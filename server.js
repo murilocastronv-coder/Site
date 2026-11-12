@@ -29,15 +29,11 @@ function siteBase(req) {
   return ALLOWED.includes(origin) ? origin : SITE_URL || `${req.protocol}://${req.get("host")}`;
 }
 
-// CORS para o site estático poder chamar a API.
+// CORS: qualquer domínio do site pode chamar a API (os preços ficam fixos no servidor).
 app.use("/api", (req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin && ALLOWED.includes(origin.replace(/\/$/, ""))) {
-    res.set("Access-Control-Allow-Origin", origin);
-    res.set("Vary", "Origin");
-    res.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.set("Access-Control-Allow-Headers", "Content-Type");
-  }
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
