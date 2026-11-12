@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: servidor-mmorpg
+    runtime: static
+    buildCommand: echo "static site"
+    staticPublishPath: .
