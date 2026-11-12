@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pagamento Confirmado | MMO Server</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0a10;--card:#1a1724;--line:#2c2738;--gold:#f5c451;--gold2:#c8932b;--text:#ece8f3;--muted:#a59fb3;--green:#25d366;--red:#ff4d5e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:grid;place-items:center;padding:20px;font-family:Inter,system-ui,sans-serif;color:var(--text);
+  background:radial-gradient(circle at 50% 20%,rgba(37,211,102,.15),transparent 50%),var(--bg)}
+.box{max-width:560px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:44px 28px;text-align:center}
+.ico{font-size:64px;margin-bottom:10px}
+h1{font-family:Cinzel,serif;font-size:clamp(26px,5vw,36px);margin-bottom:12px}
+p{color:var(--muted);margin-bottom:10px;line-height:1.6}
+.info{background:#0f0d16;border:1px solid var(--line);border-radius:12px;padding:14px;margin:18px 0;font-size:15px}
+.info b{color:var(--gold)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:800;border-radius:12px;padding:18px 28px;font-size:18px;
+  background:var(--green);color:#06210f;text-decoration:none;width:100%;margin-top:12px;box-shadow:0 10px 30px rgba(37,211,102,.35)}
+.small{font-size:13px;margin-top:16px}
+a.back{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="box" id="box">
+  <div class="ico">⏳</div>
+  <h1>Confirmando pagamento...</h1>
+  <p>Aguarde só um instante.</p>
+</div>
+<script src="config.js"></script>
+<script>
+(function(){
+  var WA = "33667881190";
+  var box = document.getElementById("box");
+  var id = new URLSearchParams(location.search).get("session_id");
+  function wa(msg){ return "https://wa.me/" + WA + "?text=" + encodeURIComponent(msg); }
+  function ok(d){
+    var msg = "Olá! Acabei de pagar pelo site ✅\nPlano: " + (d.plan||"") + "\nValor: R$ " + (d.amount||"") + "\nPedido: " + (d.ref||"");
+    box.innerHTML =
+      '<div class="ico">✅</div><h1>Pagamento Confirmado!</h1>' +
+      '<p>Parabéns! Seu servidor está garantido. Agora chame no WhatsApp para receber tudo.</p>' +
+      '<div class="info">Plano: <b>' + (d.plan||"-") + '</b><br>Valor: <b>R$ ' + (d.amount||"-") + '</b><br>Pedido: <b>' + (d.ref||"-") + '</b></div>' +
+      '<a class="btn" id="go" href="' + wa(msg) + '">💬 Receber Meu Servidor no WhatsApp</a>' +
+      '<p class="small">WhatsApp: +33 6 67 88 11 90 · Abrindo o WhatsApp em <span id="s">8</span>s...</p>';
+    var s = 8, t = setInterval(function(){
+      s--; var el = document.getElementById("s"); if (el) el.textContent = s;
+      if (s <= 0){ clearInterval(t); location.href = document.getElementById("go").href; }
+    }, 1000);
+  }
+  function fail(){
+    box.innerHTML =
+      '<div class="ico">⚠️</div><h1>Não conseguimos confirmar</h1>' +
+      '<p>Se você já pagou, fique tranquilo: chame no WhatsApp e envie o comprovante.</p>' +
+      '<a class="btn" href="' + wa("Olá! Fiz um pagamento pelo site e quero confirmar.") + '">💬 Falar no WhatsApp</a>' +
+      '<p class="small"><a class="back" href="/">← Voltar ao site</a></p>';
+  }
+  if (!id) return fail();
+  fetch((window.PAY_API||"") + "/api/session/" + encodeURIComponent(id))
+    .then(function(r){ return r.json(); })
+    .then(function(d){ d && d.paid ? ok(d) : fail(); })
+    .catch(fail);
+})();
+</script>
+</body>
+</html>
